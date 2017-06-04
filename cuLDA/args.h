@@ -14,24 +14,24 @@ template <class T>
 class Option : public OptionBase {
 public:
   Option(T v) {
-    value = v;
+    value_ = v;
   }
   void SetValue(const std::string &v) {
     std::istringstream ss(v);
-    ss >> value;
+    ss >> value_;
   }
   T GetValue() {
-    return value;
+    return value_;
   }
 private:
-  T value;
+  T value_;
 };
 
 class ArgParse {
 public:
   ArgParse() {}
   ~ArgParse() {
-    for (auto p : kv) {
+    for (auto p : kv_) {
       delete p.second;
       p.second = nullptr;
     }
@@ -42,7 +42,7 @@ public:
       std::string option = argv[i];
       if (option[0] == '-') {
         auto tokens = Split(option.substr(2), '=');
-        if (kv.find(tokens[0]) == kv.end())
+        if (kv_.find(tokens[0]) == kv_.end())
           continue;
         this->SetOption(tokens[0], tokens[1]);
       }
@@ -51,19 +51,19 @@ public:
 
   template <class T>
   void AddOption(const std::string &name, T default) {
-    kv[name] = new Option<T>(default);
+    kv_[name] = new Option<T>(default);
   }
 
   void SetOption(const std::string &name, const std::string &v) {
-    kv[name]->SetValue(v);
+    kv_[name]->SetValue(v);
   }
 
   template <class T>
   T GetOption(const std::string &name) {
-    return ((Option<T>*)kv[name])->GetValue();
+    return ((Option<T>*)kv_[name])->GetValue();
   }
 private:
-  std::map<std::string, OptionBase*> kv;
+  std::map<std::string, OptionBase*> kv_;
 };
 
 }; //namespace util

@@ -24,22 +24,22 @@ protected:
 
 protected:
   int K, M, V;
-  std::vector<std::vector<int>> nmk;
-  std::vector<int> nm;
-  std::vector<std::vector<int>> nkt;
-  std::vector<int> nk;
-  std::vector<std::vector<int>> z;
-  std::vector<std::vector<double>> theta;
-  std::vector<std::vector<double>> phi;
+  std::vector<std::vector<int>> nmk_;
+  std::vector<int> nm_;
+  std::vector<std::vector<int>> nkt_;
+  std::vector<int> nk_;
+  std::vector<std::vector<int>> z_;
+  std::vector<std::vector<double>> theta_;
+  std::vector<std::vector<double>> phi_;
   double alpha;
   double beta;
-  Docs* docs;
-  std::map<int, std::string> id2word;
-  std::map<std::string, int> word2id;
+  Docs* docs_;
+  std::map<int, std::string> id2word_;
+  std::map<std::string, int> word2id_;
 
-  std::vector<int> test_nk;
-  std::vector<int> test_z;
-  Doc* test_doc;
+  std::vector<int> test_nk_;
+  std::vector<int> test_z_;
+  Doc* test_doc_;
 };
 
 class GibbsLDA : public LDA {
@@ -55,11 +55,11 @@ public:
 protected:
   void GenerateAlias(int w);
   int SampleAlias(int w);
-  std::vector<std::vector<std::tuple<int, int, double>>> qw_alias;
-  std::vector<int> qnum;
-  std::vector<std::vector<double>> qw;
-  std::vector<double> Qw;
-  std::vector<std::set<int>> doc_topic;
+  std::vector<std::vector<std::tuple<int, int, double>>> qw_alias_;
+  std::vector<int> qnum_;
+  std::vector<std::vector<double>> qw_;
+  std::vector<double> Qw_;
+  std::vector<std::set<int>> doc_topic_;
 };
 
 class LightLDA : public LDA {
@@ -69,9 +69,9 @@ public:
 protected:
   void GenerateAlias(int w);
   int SampleAlias(int w);
-  std::vector<std::vector<std::tuple<int, int, double>>> qw_alias;
-  std::vector<int> qnum;
-  std::vector<std::vector<double>> qw;
+  std::vector<std::vector<std::tuple<int, int, double>>> qw_alias_;
+  std::vector<int> qnum_;
+  std::vector<std::vector<double>> qw_;
 };
 
 

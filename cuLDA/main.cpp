@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   args.Parse(argc, argv);
 
   std::string file_name = args.GetOption<std::string>("file_name");
-  std::string stopwords = args.GetOption<std::string>("stopwords");
+  std::string stopwords_ = args.GetOption<std::string>("stopwords");
   std::string model_path = args.GetOption<std::string>("model_path");
   std::string output = args.GetOption<std::string>("output");
   std::string phase = args.GetOption<std::string>("phase");
@@ -38,14 +38,14 @@ int main(int argc, char *argv[]) {
   
 
   if (phase == "train") {
-    Docs docs(file_name, stopwords);
+    Docs docs(file_name, stopwords_);
     auto lda = Registry::Create(type);
     lda->Init(docs, topic, alpha, beta);
     lda->Estimate(max_iter);
     lda->SaveModel(model_path);
     lda->Release();
   } else if (phase == "test") {
-    Docs docs(file_name, stopwords);
+    Docs docs(file_name, stopwords_);
     auto lda = Registry::Create(type);
     lda->LoadModel(model_path);
     std::ofstream fout(output);

@@ -9,15 +9,15 @@
 
 class MMLDA : public LDA {
 private:
-  int *nmk_d;
-  int *nm_d;
-  int *nkt_d;
-  int *nk_d;
-  int *dw_d;
-  int *wnums_d;
-  int *start_d;
-  float *theta_d;
-  float *phi_d;
+  int *nmk_d_;
+  int *nm_d_;
+  int *nkt_d_;
+  int *nk_d_;
+  int *dw_d_;
+  int *wnums_d_;
+  int *start_d_;
+  float *theta_d_;
+  float *phi_d_;
   int N;
 public:
   void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);

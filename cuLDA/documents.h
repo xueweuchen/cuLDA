@@ -8,15 +8,15 @@
 
 class Doc {
 public:
-  Doc(const std::string &doc_line, const std::set<std::string> &stopwords);
+  Doc(const std::string &doc_line, const std::set<std::string> &stopwords_);
   ~Doc() {}
 
   const std::vector<std::string>& GetWords() const {
-    return words;
+    return words_;
   }
 
 private:
-  std::vector<std::string> words;
+  std::vector<std::string> words_;
 };
 
 class Docs {
@@ -25,20 +25,20 @@ public:
   ~Docs() {}
 
   const std::vector<Doc>& GetDoclist() const {
-    return doc_list;
+    return doc_list_;
   }
   const std::map<int, std::string>& GetIdToWord() const {
-    return id2word;
+    return id2word_;
   }
   const std::map<std::string, int>& GetWordToId() const {
-    return word2id;
+    return word2id_;
   }
 
 private:
-  std::set<std::string> stopwords;
-  std::vector<Doc> doc_list;
-  std::map<int, std::string> id2word;
-  std::map<std::string, int> word2id;
+  std::set<std::string> stopwords_;
+  std::vector<Doc> doc_list_;
+  std::map<int, std::string> id2word_;
+  std::map<std::string, int> word2id_;
 
 };
 
