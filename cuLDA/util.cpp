@@ -3,7 +3,7 @@
 
 namespace util {
 
-std::vector<std::string> split(const std::string &text, char sep) {
+std::vector<std::string> Split(const std::string &text, char sep) {
   std::vector<std::string> tokens;
   std::size_t start = 0, end = 0;
   while ((end = text.find(sep, start)) != std::string::npos) {
@@ -14,7 +14,7 @@ std::vector<std::string> split(const std::string &text, char sep) {
   return tokens;
 }
 
-void generate_alias(std::vector<std::tuple<int, int, double>> &A,
+void GenerateAlias(std::vector<std::tuple<int, int, double>> &A,
     std::vector<double> &q, int K) {
   std::vector<std::pair<int, double>> L, H;
   L.reserve(K);
@@ -52,7 +52,7 @@ void generate_alias(std::vector<std::tuple<int, int, double>> &A,
   }
 }
 
-int sample_alias(std::vector<std::tuple<int, int, double>> &A, int K) {
+int SampleAlias(std::vector<std::tuple<int, int, double>> &A, int K) {
   int b = rand() % K;
   double p = rand() * 1.0 / (RAND_MAX + 1.0);
   auto t = A[b];

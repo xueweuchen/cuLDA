@@ -9,18 +9,18 @@ public:
   LDA() {}
   ~LDA() {}
 
-  virtual void init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
-  virtual void estimate(int max_iter) = 0;
-  void infer_init(Doc & doc);
-  void inference(int max_iter, std::vector<double>& topics);
-  double infer_likelihood();
-  double likelihood();
-  virtual void release() {}
-  void save_model(const std::string &path);
-  void load_model(const std::string &path);
+  virtual void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
+  virtual void Estimate(int max_iter) = 0;
+  void InferInit(Doc & doc);
+  void Inference(int max_iter, std::vector<double>& topics);
+  double InferLikelihood();
+  double Likelihood();
+  virtual void Release() {}
+  void SaveModel(const std::string &path);
+  void LoadModel(const std::string &path);
 
 protected:
-  void update_param();
+  void UpdateParam();
 
 protected:
   int K, M, V;
@@ -44,17 +44,17 @@ protected:
 
 class GibbsLDA : public LDA {
 public:
-  void init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
-  virtual void estimate(int max_iter);
+  void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
+  virtual void Estimate(int max_iter);
 };
 
 class AliasLDA : public LDA {
 public:
-  void init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
-  virtual void estimate(int max_iter);
+  void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
+  virtual void Estimate(int max_iter);
 protected:
-  void generate_alias(int w);
-  int sample_alias(int w);
+  void GenerateAlias(int w);
+  int SampleAlias(int w);
   std::vector<std::vector<std::tuple<int, int, double>>> qw_alias;
   std::vector<int> qnum;
   std::vector<std::vector<double>> qw;
@@ -64,11 +64,11 @@ protected:
 
 class LightLDA : public LDA {
 public:
-  void init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
-  virtual void estimate(int max_iter);
+  void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
+  virtual void Estimate(int max_iter);
 protected:
-  void generate_alias(int w);
-  int sample_alias(int w);
+  void GenerateAlias(int w);
+  int SampleAlias(int w);
   std::vector<std::vector<std::tuple<int, int, double>>> qw_alias;
   std::vector<int> qnum;
   std::vector<std::vector<double>> qw;

@@ -2,15 +2,15 @@
 #include "util.h"
 
 
-void LDA::init(Docs& docs, int K, double alpha, double beta) {
+void LDA::Init(Docs& docs, int K, double alpha, double beta) {
   std::srand(std::time(NULL));
   this->K = K;
   this->alpha = alpha;
   this->beta = beta;
   this->docs = &docs;
-  auto doc_list = docs.get_doclist();
-  word2id = docs.get_word2id();
-  id2word = docs.get_id2word();
+  auto doc_list = docs.GetDoclist();
+  word2id = docs.GetWordToId();
+  id2word = docs.GetIdToWord();
   this->M = doc_list.size();
   this->V = word2id.size();
 
@@ -25,7 +25,7 @@ void LDA::init(Docs& docs, int K, double alpha, double beta) {
     phi.push_back(std::vector<double>(V, 0.0));
   }
   for (int m = 0; m < M; ++m) {
-    auto wlist = doc_list[m].get_words();
+    auto wlist = doc_list[m].GetWords();
     int wnum = wlist.size();
     z.push_back(std::vector<int>(wnum, 0));
     for (int w = 0; w < wnum; w++) {
@@ -40,12 +40,12 @@ void LDA::init(Docs& docs, int K, double alpha, double beta) {
 }
 
 
-void LDA::infer_init(Doc &doc) {
+void LDA::InferInit(Doc &doc) {
   std::srand(std::time(NULL));
   test_nk.clear();
   test_z.clear();
   this->test_doc = &doc;
-  auto wlist = doc.get_words();
+  auto wlist = doc.GetWords();
   int wnum = wlist.size();
   for (int k = 0; k < K; ++k) {
     test_nk.push_back(0);
@@ -60,10 +60,10 @@ void LDA::infer_init(Doc &doc) {
   }
 }
 
-void LDA::inference(int max_iter, std::vector<double>& topics) {
+void LDA::Inference(int max_iter, std::vector<double>& topics) {
   std::srand(std::time(NULL));
   std::vector<double> p(K, 0);
-  auto wlist = test_doc->get_words();
+  auto wlist = test_doc->GetWords();
   int wnum = wlist.size();
 
   for (int iter = 0; iter < max_iter; ++iter) {
@@ -83,7 +83,7 @@ void LDA::inference(int max_iter, std::vector<double>& topics) {
       test_z[w] = new_topic;
       test_nk[new_topic] += 1;
     }
-    double llh = infer_likelihood();
+    double llh = InferLikelihood();
     std::cout << "The " << iter << "-th iteration finished, llh = " << llh << "."
       << std::endl;
   }
@@ -95,10 +95,10 @@ void LDA::inference(int max_iter, std::vector<double>& topics) {
   }
 }
 
-double LDA::infer_likelihood() {
+double LDA::InferLikelihood() {
   double logllh = 0.0;
   int word_num = 0;
-  auto wlist = test_doc->get_words();
+  auto wlist = test_doc->GetWords();
 
   int test_nm = std::accumulate(test_nk.begin(), test_nk.end(), 0);
   for (int w = 0; w < wlist.size(); ++w) {
@@ -113,12 +113,12 @@ double LDA::infer_likelihood() {
   return logllh / word_num;
 }
 
-double LDA::likelihood() {
+double LDA::Likelihood() {
   double logllh = 0.0;
   int word_num = 0;
-  auto doc_list = docs->get_doclist();
+  auto doc_list = docs->GetDoclist();
   for (int m = 0; m < M; ++m) {
-    auto wlist = doc_list[m].get_words();
+    auto wlist = doc_list[m].GetWords();
     for (int w = 0; w < wlist.size(); ++w) {
       double prob = 0.0;
       int wid = word2id[wlist[w]];
@@ -133,7 +133,7 @@ double LDA::likelihood() {
   return logllh / word_num;
 }
 
-void LDA::save_model(const std::string & path) {
+void LDA::SaveModel(const std::string & path) {
   std::ofstream fout(path);
   fout << alpha << ' ' << beta << std::endl;
   fout << M << ' ' << K << ' ' << V << std::endl;
@@ -147,7 +147,7 @@ void LDA::save_model(const std::string & path) {
     fout << wi.first << ' ' << wi.second << ' ';
 }
 
-void LDA::load_model(const std::string & path) {
+void LDA::LoadModel(const std::string & path) {
   std::ifstream fin(path);
   fin >> alpha >> beta;
   fin >> M >> K >> V;
@@ -168,7 +168,7 @@ void LDA::load_model(const std::string & path) {
   }
 }
 
-void LDA::update_param() {
+void LDA::UpdateParam() {
   for (int m = 0; m < M; ++m)
     for (int k = 0; k < K; ++k)
       theta[m][k] = (nmk[m][k] + alpha) / (nm[m] + K * alpha);
@@ -177,18 +177,18 @@ void LDA::update_param() {
       phi[k][t] = (nkt[k][t] + beta) / (nk[k] + V * beta);
 }
 
-void GibbsLDA::init(Docs & docs, int K, double alpha, double beta) {
-  LDA::init(docs, K, alpha, beta);
+void GibbsLDA::Init(Docs & docs, int K, double alpha, double beta) {
+  LDA::Init(docs, K, alpha, beta);
 }
 
-void GibbsLDA::estimate(int max_iter) {
+void GibbsLDA::Estimate(int max_iter) {
   std::srand(std::time(NULL));
   std::vector<double> p(K, 0);
-  auto doc_list = docs->get_doclist();
+  auto doc_list = docs->GetDoclist();
 
   for (int iter = 0; iter < max_iter; ++iter) {
     for (int m = 0; m < M; ++m) {
-      auto wlist = doc_list[m].get_words();
+      auto wlist = doc_list[m].GetWords();
       for (int w = 0; w < wlist.size(); ++w) {
         int wid = word2id[wlist[w]];
         int topic = z[m][w];
@@ -213,22 +213,22 @@ void GibbsLDA::estimate(int max_iter) {
         nk[new_topic] += 1;
       }
     }
-    double llh = likelihood();
+    double llh = Likelihood();
     std::cout << "The " << iter << "-th iteration finished, llh = " << llh << "."
       << std::endl;
   }
-  this->update_param();
+  this->UpdateParam();
 }
 
-void AliasLDA::init(Docs & docs, int K, double alpha, double beta) {
-  LDA::init(docs, K, alpha, beta);
+void AliasLDA::Init(Docs & docs, int K, double alpha, double beta) {
+  LDA::Init(docs, K, alpha, beta);
   for (int t = 0; t < V; ++t) {
     Qw.push_back(0.0);
     qnum.push_back(0);
     qw.push_back(std::vector<double>(K, 0.0));
     qw_alias.push_back(
       std::vector<std::tuple<int, int, double>>(K, std::make_tuple(0, 0, 0.0)));
-    generate_alias(t);
+    GenerateAlias(t);
   }
   for (int m = 0; m < M; ++m) {
     doc_topic.push_back(std::set<int>());
@@ -239,15 +239,15 @@ void AliasLDA::init(Docs & docs, int K, double alpha, double beta) {
   std::cout << "Finish initialize AliasLDA!" << std::endl;
 }
 
-void AliasLDA::estimate(int max_iter) {
+void AliasLDA::Estimate(int max_iter) {
   std::srand(time(NULL));
   std::vector<double> p(K, 0);
   std::vector<int> t(K, 0);
-  auto doc_list = docs->get_doclist();
+  auto doc_list = docs->GetDoclist();
 
   for (int iter = 0; iter < max_iter; ++iter) {
     for (int m = 0; m < M; ++m) {
-      auto wlist = doc_list[m].get_words();
+      auto wlist = doc_list[m].GetWords();
       for (int w = 0; w < wlist.size(); ++w) {
         int wid = word2id[wlist[w]];
         int topic = z[m][w];
@@ -276,7 +276,7 @@ void AliasLDA::estimate(int max_iter) {
             new_topic = t[tid];
           } else {
             qnum[wid]++;
-            new_topic = sample_alias(wid);
+            new_topic = SampleAlias(wid);
           }
           if (topic != new_topic) {
             double tmp_old = (nkt[topic][wid] + beta) / (nk[topic] + V * beta);
@@ -295,18 +295,18 @@ void AliasLDA::estimate(int max_iter) {
         nk[new_topic] += 1;
         doc_topic[m].insert(new_topic);
         if (qnum[wid] > K / 2) {
-          generate_alias(wid);
+          GenerateAlias(wid);
         }
       }
     }
-    double llh = likelihood();
+    double llh = Likelihood();
     std::cout << "The " << iter << "-th iteration finished, llh = " << llh << "."
       << std::endl;
   }
-  this->update_param();
+  this->UpdateParam();
 }
 
-void AliasLDA::generate_alias(int w) {
+void AliasLDA::GenerateAlias(int w) {
   qnum[w] = 0;
   auto &A = qw_alias[w];
   A.clear();
@@ -319,32 +319,32 @@ void AliasLDA::generate_alias(int w) {
   for (int k = 0; k < K; ++k) {
     q[k] /= Qw[w];
   }
-  util::generate_alias(A, q, K);
+  util::GenerateAlias(A, q, K);
 }
 
-int AliasLDA::sample_alias(int w) {
-  return util::sample_alias(qw_alias[w], K);
+int AliasLDA::SampleAlias(int w) {
+  return util::SampleAlias(qw_alias[w], K);
 }
 
-void LightLDA::init(Docs & docs, int K, double alpha, double beta) {
-  LDA::init(docs, K, alpha, beta);
+void LightLDA::Init(Docs & docs, int K, double alpha, double beta) {
+  LDA::Init(docs, K, alpha, beta);
   for (int t = 0; t < V; ++t) {
     qnum.push_back(0);
     qw.push_back(std::vector<double>(K, 0.0));
     qw_alias.push_back(
       std::vector<std::tuple<int, int, double>>(K, std::make_tuple(0, 0, 0.0)));
-    generate_alias(t);
+    GenerateAlias(t);
   }
   std::cout << "Finish initialize LightLDA!" << std::endl;
 }
 
-void LightLDA::estimate(int max_iter) {
+void LightLDA::Estimate(int max_iter) {
   std::srand(time(NULL));
-  auto doc_list = docs->get_doclist();
+  auto doc_list = docs->GetDoclist();
 
   for (int iter = 0; iter < max_iter; ++iter) {
     for (int m = 0; m < M; ++m) {
-      auto wlist = doc_list[m].get_words();
+      auto wlist = doc_list[m].GetWords();
       int wnum = wlist.size();
       for (int w = 0; w < wnum; ++w) {
         int wid = word2id[wlist[w]];
@@ -377,7 +377,7 @@ void LightLDA::estimate(int max_iter) {
             }
           } else {
             qnum[wid]++;
-            new_topic = sample_alias(wid);
+            new_topic = SampleAlias(wid);
 
             if (topic != new_topic) {
               double tmp_old = (nkt[topic][wid] + beta) * (nmk[m][topic] + alpha) /
@@ -396,18 +396,18 @@ void LightLDA::estimate(int max_iter) {
         nkt[new_topic][wid] += 1;
         nk[new_topic] += 1;
         if (qnum[wid] > K / 2) {
-          generate_alias(wid);
+          GenerateAlias(wid);
         }
       }
     }
-    double llh = likelihood();
+    double llh = Likelihood();
     std::cout << "The " << iter << "-th iteration finished, llh = " << llh << "."
       << std::endl;
   }
-  this->update_param();
+  this->UpdateParam();
 }
 
-void LightLDA::generate_alias(int w) {
+void LightLDA::GenerateAlias(int w) {
   qnum[w] = 0;
   auto &A = qw_alias[w];
   A.clear();
@@ -420,9 +420,9 @@ void LightLDA::generate_alias(int w) {
   for (int k = 0; k < K; ++k) {
     q[k] /= prob_sum;
   }
-  util::generate_alias(A, q, K);
+  util::GenerateAlias(A, q, K);
 }
 
-int LightLDA::sample_alias(int w) {
-  return util::sample_alias(qw_alias[w], K);
+int LightLDA::SampleAlias(int w) {
+  return util::SampleAlias(qw_alias[w], K);
 }

@@ -20,11 +20,11 @@ private:
   float *phi_d;
   int N;
 public:
-  void init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
-  virtual void estimate(int max_iter);
-  virtual void update_param_gpu();
-  virtual float likelihood_gpu();
-  void release();
+  void Init(Docs& docs, int K, double alpha = 0.1, double beta = 0.1);
+  virtual void Estimate(int max_iter);
+  virtual void UpdateParamGpu();
+  virtual float LikelihoodGpu();
+  void Release();
 };
 
 

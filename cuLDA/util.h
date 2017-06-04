@@ -19,12 +19,12 @@
 
 namespace util {
 
-std::vector<std::string> split(const std::string &text, char sep);
-void generate_alias(std::vector<std::tuple<int, int, double>> &A, std::vector<double> &q, int K);
-int sample_alias(std::vector<std::tuple<int, int, double>> &A, int K);
+std::vector<std::string> Split(const std::string &text, char sep);
+void GenerateAlias(std::vector<std::tuple<int, int, double>> &A, std::vector<double> &q, int K);
+int SampleAlias(std::vector<std::tuple<int, int, double>> &A, int K);
 
 template <class T>
-inline void dump_vector(const std::vector<T> &v, std::ofstream &fout) {
+inline void DumpVector(const std::vector<T> &v, std::ofstream &fout) {
   for (auto e : v)
     fout << e << ' ';
   fout << std::endl;

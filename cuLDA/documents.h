@@ -11,7 +11,7 @@ public:
   Doc(const std::string &doc_line, const std::set<std::string> &stopwords);
   ~Doc() {}
 
-  const std::vector<std::string>& get_words() const {
+  const std::vector<std::string>& GetWords() const {
     return words;
   }
 
@@ -24,13 +24,13 @@ public:
   Docs(const std::string file_name, const std::string stopwords_file);
   ~Docs() {}
 
-  const std::vector<Doc>& get_doclist() const {
+  const std::vector<Doc>& GetDoclist() const {
     return doc_list;
   }
-  const std::map<int, std::string>& get_id2word() const {
+  const std::map<int, std::string>& GetIdToWord() const {
     return id2word;
   }
-  const std::map<std::string, int>& get_word2id() const {
+  const std::map<std::string, int>& GetWordToId() const {
     return word2id;
   }
 

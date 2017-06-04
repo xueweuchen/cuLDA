@@ -13,49 +13,49 @@ REGISTER_CLASS("LightLDA", LightLDA);
 
 int main(int argc, char *argv[]) {
   util::ArgParse args;
-  args.add_option<double>("alpha", 0.1);
-  args.add_option<double>("beta", 0.1);
-  args.add_option<int>("topic", 50);
-  args.add_option<std::string>("file_name", "");
-  args.add_option<std::string>("stopwords", "");
-  args.add_option<std::string>("model_path", "model.dat");
-  args.add_option<std::string>("output", "output.dat");
-  args.add_option<std::string>("phase", "train");
-  args.add_option<int>("max_iter", 100);
-  args.add_option<std::string>("type", "AliasLDA");
-  args.parse(argc, argv);
+  args.AddOption<double>("alpha", 0.1);
+  args.AddOption<double>("beta", 0.1);
+  args.AddOption<int>("topic", 50);
+  args.AddOption<std::string>("file_name", "");
+  args.AddOption<std::string>("stopwords", "");
+  args.AddOption<std::string>("model_path", "model.dat");
+  args.AddOption<std::string>("output", "output.dat");
+  args.AddOption<std::string>("phase", "train");
+  args.AddOption<int>("max_iter", 100);
+  args.AddOption<std::string>("type", "AliasLDA");
+  args.Parse(argc, argv);
 
-  std::string file_name = args.get_option<std::string>("file_name");
-  std::string stopwords = args.get_option<std::string>("stopwords");
-  std::string model_path = args.get_option<std::string>("model_path");
-  std::string output = args.get_option<std::string>("output");
-  std::string phase = args.get_option<std::string>("phase");
-  std::string type = args.get_option<std::string>("type");
-  int topic = args.get_option<int>("topic");
-  int max_iter = args.get_option<int>("max_iter");
-  double alpha = args.get_option<double>("alpha");
-  double beta = args.get_option<double>("beta");
+  std::string file_name = args.GetOption<std::string>("file_name");
+  std::string stopwords = args.GetOption<std::string>("stopwords");
+  std::string model_path = args.GetOption<std::string>("model_path");
+  std::string output = args.GetOption<std::string>("output");
+  std::string phase = args.GetOption<std::string>("phase");
+  std::string type = args.GetOption<std::string>("type");
+  int topic = args.GetOption<int>("topic");
+  int max_iter = args.GetOption<int>("max_iter");
+  double alpha = args.GetOption<double>("alpha");
+  double beta = args.GetOption<double>("beta");
   
 
   if (phase == "train") {
     Docs docs(file_name, stopwords);
-    auto lda = Registry::create(type);
-    lda->init(docs, topic, alpha, beta);
-    lda->estimate(max_iter);
-    lda->save_model(model_path);
-    lda->release();
+    auto lda = Registry::Create(type);
+    lda->Init(docs, topic, alpha, beta);
+    lda->Estimate(max_iter);
+    lda->SaveModel(model_path);
+    lda->Release();
   } else if (phase == "test") {
     Docs docs(file_name, stopwords);
-    auto lda = Registry::create(type);
-    lda->load_model(model_path);
+    auto lda = Registry::Create(type);
+    lda->LoadModel(model_path);
     std::ofstream fout(output);
-    for (auto test_doc : docs.get_doclist()) {
-      lda->infer_init(test_doc);
+    for (auto test_doc : docs.GetDoclist()) {
+      lda->InferInit(test_doc);
       std::vector<double> topics;
-      lda->inference(max_iter, topics);
-      util::dump_vector(topics, fout);
+      lda->Inference(max_iter, topics);
+      util::DumpVector(topics, fout);
     }
-    lda->release();
+    lda->Release();
   } else {
     std::cout << "Unknown phase!" << std::endl;
   }

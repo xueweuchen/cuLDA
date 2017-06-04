@@ -7,9 +7,11 @@
 #include "device_atomic_functions.h"
 #include "device_launch_parameters.h"
 #include "curand.h"
-#include "curand_kernel.h"#include <thrust/iterator/counting_iterator.h>
+#include "curand_kernel.h"
+#include <thrust/iterator/counting_iterator.h>
 #include <thrust/functional.h>
-#include <thrust/transform_reduce.h>#include <thrust/device_vector.h>
+#include <thrust/transform_reduce.h>
+#include <thrust/device_vector.h>
 #include <thrust/device_ptr.h>
 
 

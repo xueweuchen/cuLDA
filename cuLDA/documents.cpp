@@ -30,7 +30,7 @@ Docs::Docs(const std::string file_name, const std::string stopwords_file) {
 
   std::map<std::string, int> word_count;
   for (auto doc : doc_list) {
-    auto wlist = doc.get_words();
+    auto wlist = doc.GetWords();
     for (auto w : wlist)
       word_count[w]++;
   }

@@ -8,18 +8,18 @@ public:
   typedef std::shared_ptr<LDA>(*Creator)();
   typedef std::map<std::string, Creator> CreatorRegistry;
 
-  static CreatorRegistry& getRegistry() {
+  static CreatorRegistry& GetRegistry() {
     static CreatorRegistry* g_registry_ = new CreatorRegistry();
     return *g_registry_;
   }
 
-  static void addEntry(const std::string &type, Creator creator) {
-    CreatorRegistry& registry = getRegistry();
+  static void AddEntry(const std::string &type, Creator creator) {
+    CreatorRegistry& registry = GetRegistry();
     registry[type] = creator;
   }
 
-  static std::shared_ptr<LDA> create(const std::string &type) {
-    CreatorRegistry& registry = getRegistry();
+  static std::shared_ptr<LDA> Create(const std::string &type) {
+    CreatorRegistry& registry = GetRegistry();
     return registry[type]();
   }
 };
@@ -28,16 +28,16 @@ class Register {
 public:
   Register(const std::string& type,
     std::shared_ptr<LDA>(*creator)()) {
-    Registry::addEntry(type, creator);
+    Registry::AddEntry(type, creator);
   }
 };
 
 
 #define REGISTER_CLASS(name, type) \
-std::shared_ptr<LDA> create_##type##() { \
+std::shared_ptr<LDA> Create_##type##() { \
   return std::shared_ptr<LDA>(new type##());  \
 }               \
-static Register register_##type##(name, create_##type##);
+static Register register_##type##(name, Create_##type##);
 
 
 #endif // !_FACTORY_

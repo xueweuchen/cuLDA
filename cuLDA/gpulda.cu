@@ -3,8 +3,8 @@
 #include <iostream>
 
 
-void MMLDA::init(Docs &docs, int K, double alpha, double beta) {
-  LDA::init(docs, K, alpha, beta);
+void MMLDA::Init(Docs &docs, int K, double alpha, double beta) {
+  LDA::Init(docs, K, alpha, beta);
   HANDLE_ERROR(cudaSetDevice(0));
   HANDLE_ERROR(cudaMalloc((void**)&nmk_d, M * K * sizeof(int)));
   HANDLE_ERROR(cudaMalloc((void**)&nm_d, M * sizeof(int)));
@@ -25,13 +25,13 @@ void MMLDA::init(Docs &docs, int K, double alpha, double beta) {
   HANDLE_ERROR(cudaMemset(phi_d, 0, V * K * sizeof(int)));
   HANDLE_ERROR(cudaMemset(theta_d, 0, M * K * sizeof(int)));
 
-  auto doc_list = this->docs->get_doclist();
+  auto doc_list = this->docs->GetDoclist();
   std::vector<int> dw_h;
   std::vector<int> wnums_h(M, 0);
   std::vector<int> start_h(M, 0);
   this->N = 0;
   for (int m = 0; m < M; ++m) {
-    auto wlist = doc_list[m].get_words();
+    auto wlist = doc_list[m].GetWords();
     int wnum = wlist.size();
     this->N += wnum;
     wnums_h[m] = wnum;
@@ -47,11 +47,11 @@ void MMLDA::init(Docs &docs, int K, double alpha, double beta) {
   HANDLE_ERROR(cudaMalloc((void**)&dw_d, dw_h.size() * sizeof(float)));
   HANDLE_ERROR(cudaMemcpy(dw_d, &dw_h[0], dw_h.size() * sizeof(int), cudaMemcpyHostToDevice));
 
-  this->update_param_gpu();
+  this->UpdateParamGpu();
   std::cout << "Finish initialize Mean Mode LDA!" << std::endl;
 }
 
-__global__ void compute_phi(float *phi, int *nkt, int *nk, int K, int V, float beta) {
+__global__ void ComputePhi(float *phi, int *nkt, int *nk, int K, int V, float beta) {
   CUDA_KERNEL_LOOP(i, K * V) {
     int k = i / V;
     int t = i % V;
@@ -59,7 +59,7 @@ __global__ void compute_phi(float *phi, int *nkt, int *nk, int K, int V, float b
   }
 }
 
-__global__ void compute_theta(float *theta, int *nmk, int *nm, int K, int M, float alpha) {
+__global__ void ComputeTheta(float *theta, int *nmk, int *nm, int K, int M, float alpha) {
   CUDA_KERNEL_LOOP(i, K * M) {
     int m = i / K;
     int k = i % K;
@@ -67,15 +67,15 @@ __global__ void compute_theta(float *theta, int *nmk, int *nm, int K, int M, flo
   }
 }
 
-void MMLDA::update_param_gpu() {
-  compute_phi<<<GET_BLOCKS((K * V)), CUDA_NUM_THREADS>>>(phi_d, nkt_d, nk_d, K, V, beta);
-  compute_theta<<<GET_BLOCKS((K * M)), CUDA_NUM_THREADS>>>(theta_d, nmk_d, nm_d, K, M, alpha);
+void MMLDA::UpdateParamGpu() {
+  ComputePhi<<<GET_BLOCKS((K * V)), CUDA_NUM_THREADS>>>(phi_d, nkt_d, nk_d, K, V, beta);
+  ComputeTheta<<<GET_BLOCKS((K * M)), CUDA_NUM_THREADS>>>(theta_d, nmk_d, nm_d, K, M, alpha);
   HANDLE_ERROR(cudaGetLastError());
   HANDLE_ERROR(cudaDeviceSynchronize());
 }
 
 
-__global__ void sample_doc(int *dw, int *wnums, int *start, int *nkt, int *nk, int *nmk, 
+__global__ void SampleDoc(int *dw, int *wnums, int *start, int *nkt, int *nk, int *nmk, 
     int *nm, int K, int M, int V, float *phi, float *theta) {
   CUDA_KERNEL_LOOP(m, M) {
     unsigned int seed = m;
@@ -108,24 +108,24 @@ __global__ void sample_doc(int *dw, int *wnums, int *start, int *nkt, int *nk, i
   }
 }
 
-void MMLDA::estimate(int max_iter) {
+void MMLDA::Estimate(int max_iter) {
   for (int iter = 0; iter < max_iter; ++iter) {
     HANDLE_ERROR(cudaMemset(nmk_d, 0, M * K * sizeof(int)));
     HANDLE_ERROR(cudaMemset(nm_d, 0, M * sizeof(int)));
     HANDLE_ERROR(cudaMemset(nkt_d, 0, V * K * sizeof(int)));
     HANDLE_ERROR(cudaMemset(nk_d, 0, K * sizeof(int)));
-    sample_doc<<<GET_BLOCKS(M), CUDA_NUM_THREADS >>> (dw_d, wnums_d, start_d, nkt_d, 
+    SampleDoc<<<GET_BLOCKS(M), CUDA_NUM_THREADS >>> (dw_d, wnums_d, start_d, nkt_d, 
       nk_d, nmk_d, nm_d, K, M, V, phi_d, theta_d);
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
-    this->update_param_gpu();
-    float llh = likelihood_gpu();
+    this->UpdateParamGpu();
+    float llh = LikelihoodGpu();
     std::cout << "The " << iter << "-th iteration finished, llh = " << llh << "."
       << std::endl;
   }
 }
 
-__global__ void llh_kernel(float *result, int *dw, int *wnums, int *start, int K, 
+__global__ void LlhKernel(float *result, int *dw, int *wnums, int *start, int K, 
     int M, int V, float *phi, float *theta) {
   CUDA_KERNEL_LOOP(m, M) {
     int wnum = wnums[m];
@@ -141,10 +141,10 @@ __global__ void llh_kernel(float *result, int *dw, int *wnums, int *start, int K
   }
 }
 
-float MMLDA::likelihood_gpu() {
+float MMLDA::LikelihoodGpu() {
   float *result_d;
   HANDLE_ERROR(cudaMalloc((void**)&result_d, M * sizeof(float)));
-  llh_kernel <<<GET_BLOCKS(M), CUDA_NUM_THREADS>>> (result_d, dw_d, wnums_d, start_d, K, M, V, phi_d, theta_d);
+  LlhKernel <<<GET_BLOCKS(M), CUDA_NUM_THREADS>>> (result_d, dw_d, wnums_d, start_d, K, M, V, phi_d, theta_d);
   HANDLE_ERROR(cudaGetLastError());
   HANDLE_ERROR(cudaDeviceSynchronize());
   thrust::device_ptr<float> dptr = thrust::device_pointer_cast(result_d);
@@ -153,7 +153,7 @@ float MMLDA::likelihood_gpu() {
   return result / N;
 }
 
-void MMLDA::release() {
+void MMLDA::Release() {
   HANDLE_ERROR(cudaFree(nmk_d));
   HANDLE_ERROR(cudaFree(nm_d));
   HANDLE_ERROR(cudaFree(nkt_d));
